@@ -7,9 +7,15 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Collect;
 import frc.robot.commands.Drive;
+import frc.robot.commands.Shoot;
 import frc.robot.subsystems.Consumer;
+import frc.robot.subsystems.Shooter;
 import frc.robot.subsystems.Tank;
 import frc.thunder.LightningContainer;
+
+import java.util.stream.Collector;
+
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -20,26 +26,20 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
-public class RobotContainer extends LightningContainer{
+public class RobotContainer extends LightningContainer {
   private Tank tank;
   private Consumer consumer;
+  private Shooter shooter;
 
-  private final CommandXboxController driver =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
-
-  
-  public RobotContainer() {
-    configureBindings();
-  }
-
-  private void configureBindings() {
-    
-  }
+  private XboxController driver;
 
   @Override
   protected void initializeSubsystems() {
     tank = new Tank();
     consumer = new Consumer();
+    shooter = new Shooter();
+
+    driver = new XboxController(0);
   }
 
   @Override
@@ -47,22 +47,25 @@ public class RobotContainer extends LightningContainer{
 
   @Override
   protected void configureButtonBindings() {
-
+    new Trigger(driver::getAButton).whileTrue(new Shoot(shooter, () -> 0.8));
   }
 
   @Override
   protected void configureDefaultCommands() {
-    new Drive(tank, 
-      () -> (driver.getLeftTriggerAxis()), 
-      () -> (driver.getRightTriggerAxis()));
+    tank.setDefaultCommand(
+      new Drive(tank, 
+        () -> (-driver.getLeftY()), 
+        () -> (driver.getRightY()))
+      );
 
-    new Collect(consumer, () -> (driver.getRightTriggerAxis() - driver.getLeftTriggerAxis()));
+    consumer.setDefaultCommand(
+      new Collect(consumer, 
+        () -> (driver.getRightTriggerAxis() - driver.getLeftTriggerAxis())));
   }
 
   @Override
   protected Command getAutonomousCommand() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getAutonomousCommand'");
+    return null; // I ain't doing allat
   }
 
 }
