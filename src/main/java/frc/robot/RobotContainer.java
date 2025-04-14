@@ -53,10 +53,7 @@ public class RobotContainer extends LightningContainer {
   @Override
   protected void configureDefaultCommands() {
     tank.setDefaultCommand(
-      new Drive(tank, 
-        () -> (-driver.getLeftY()), 
-        () -> (driver.getRightY()))
-      );
+      new Drive(tank, () -> (-driver.getLeftY()), () -> (driver.getRightY())));
 
     consumer.setDefaultCommand(
       new Collect(consumer, 
